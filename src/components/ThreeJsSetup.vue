@@ -18,7 +18,7 @@ const viewer = ref()
 
 // Scene
 const scene = new Scene()
-// scene.background = Color('#fff')
+scene.background = new Color('#444d5c')
 
 // Camera
 const camera = new PerspectiveCamera(
@@ -31,7 +31,6 @@ camera.position.x = 1
 camera.position.y = 2
 camera.position.z = 5
 camera.rotation.x = -0.5
-// camera.rotation.y = 2
 
 // Light
 const light = new SpotLight('hsl(0, 100%, 100%)')
@@ -40,11 +39,7 @@ scene.add(light)
 
 // Renderer
 const renderer = new WebGLRenderer()
-
-// renderer.setSize(window.innerWidth, window.innerHeight)
 renderer.setSize(1280, 720)
-// document.body.appendChild(renderer.domElement)
-// viewer.appendChild(renderer.domElement)
 
 // Mesh
 const geometry = new BoxGeometry()
@@ -64,7 +59,6 @@ scene.add(axes)
 const animate = () => {
   requestAnimationFrame(animate)
 
-  // cube.rotation.x += 0.01
   cube.rotation.y += 0.01
 
   // Render
