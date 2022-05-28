@@ -11,13 +11,16 @@ import {
   SpotLight,
   AxesHelper,
   Clock,
+  Vector3,
 } from 'three'
 import { onMounted, ref } from 'vue'
 import gsap from 'gsap'
 import STLLoader from './loaders/STLLoader'
+import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
 
 // Ref
 const viewer = ref()
+const cursor = ref({ x: 0, y: 0 })
 
 // Scene
 const scene = new Scene()
@@ -30,9 +33,7 @@ const camera = new PerspectiveCamera(
   0.1,
   1000
 )
-camera.position.set(1, 1, 9)
-
-// camera.rotation.x = -0.5
+camera.position.set(3, 3, 9)
 
 // Light
 const light = new SpotLight('hsl(0, 100%, 100%)')
@@ -40,8 +41,12 @@ light.position.set(10, 5, 5)
 scene.add(light)
 
 // Renderer
+const viewportSize = {
+  x: 1280,
+  y: 720,
+}
 const renderer = new WebGLRenderer()
-renderer.setSize(1280, 720)
+renderer.setSize(viewportSize.x, viewportSize.y)
 
 // Mesh
 const geometry = new BoxGeometry()
@@ -53,15 +58,11 @@ const material = new MeshStandardMaterial({
 const cube = new Mesh(geometry, material)
 // scene.add(cube)
 
+// Building
 const loader = new STLLoader()
-
 loader.load('assets/STL_files/test_building.stl', geo => {
   const building = new Mesh(geo, material)
-  // building.rotation.y = Math.PI * -0.5
-
   scene.add(building)
-
-  camera.lookAt(building.position)
 })
 
 // Axes
@@ -80,6 +81,14 @@ const tick = () => {
   // camera.position.x = Math.cos(elapsedTime * 1)
   // camera.lookAt(cube.position)
 
+  // camera.position.x = Math.sin(cursor.value.x * -2 * Math.PI) * 10
+  // camera.position.z = Math.cos(cursor.value.x * -2 * Math.PI) * 10
+  // camera.position.y = cursor.value.y * 10
+  // camera.lookAt(new Vector3(0))
+
+  // camera.position.x = cursor.x
+  // camera.position.y = cursor.y
+
   // Render
   renderer.render(scene, camera)
 
@@ -88,6 +97,9 @@ const tick = () => {
 
 onMounted(() => {
   viewer.value.appendChild(renderer.domElement)
+
+  const controls = new OrbitControls(camera, renderer.domElement)
+
   tick()
 })
 
