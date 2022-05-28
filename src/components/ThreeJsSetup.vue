@@ -30,6 +30,14 @@ loader.load('assets/STL_files/test_building.stl', geo => {
   const gui = new GUI()
 
   /**************************************
+   ******** Parameters
+   *************************************/
+  const params = {
+    color: '#fff',
+    lightColor: '#fff',
+  }
+
+  /**************************************
    ******** Scene
    *************************************/
   const scene = new Scene()
@@ -53,6 +61,9 @@ loader.load('assets/STL_files/test_building.stl', geo => {
   light.position.set(10, 5, 5)
   scene.add(light)
 
+  gui
+    .addColor(params, 'lightColor')
+    .onChange(() => light.color.set(params.lightColor))
   /**************************************
    ******** Renderer
    *************************************/
@@ -75,12 +86,17 @@ loader.load('assets/STL_files/test_building.stl', geo => {
   /**************************************
    ******** Mesh
    *************************************/
-  const geometry = new BoxGeometry()
   const material = new MeshStandardMaterial({
     side: FrontSide,
-    color: 'hsl(0, 0, 50%)',
+    color: params.color,
     wireframe: false,
   })
+  gui
+    .addColor(params, 'color')
+    .onChange(() => material.color.set(params.color))
+    .name('Building Color')
+
+  const geometry = new BoxGeometry()
   const cube = new Mesh(geometry, material)
   // scene.add(cube)
 
