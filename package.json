@@ -7,6 +7,7 @@
     "preview": "vite preview --port 5050"
   },
   "dependencies": {
+    "dat.gui": "^0.7.9",
     "gsap": "^3.10.4",
     "three": "^0.140.2",
     "vue": "^3.2.33",
