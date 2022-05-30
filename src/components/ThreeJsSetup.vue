@@ -20,7 +20,7 @@ import {
   DoubleSide,
   DirectionalLightHelper,
 } from 'three'
-import { onMounted, ref, watchEffect } from 'vue'
+import { onMounted, ref, render, watchEffect } from 'vue'
 // import gsap from 'gsap'
 import STLLoader from './loaders/STLLoader'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
@@ -42,7 +42,7 @@ loader.load('assets/STL_files/test_building.stl', geo => {
   const params = {
     color: '#fff',
     sunColor: '#ffffe8',
-    ambientColor: '#c5dde0',
+    ambientColor: '#fff',
     shine: 10,
   }
 
@@ -64,7 +64,7 @@ loader.load('assets/STL_files/test_building.stl', geo => {
   camera.position.set(3, 3, 9)
 
   /**************************************
-   ******** Light
+   ******** Lights
    *************************************/
   const ambientLight = new AmbientLight(params.ambientColor, 0.4)
   scene.add(ambientLight)
@@ -73,12 +73,10 @@ loader.load('assets/STL_files/test_building.stl', geo => {
     .addColor(params, 'ambientColor')
     .onChange(() => ambientLight.color.set(params.ambientColor))
 
-  const sun = new DirectionalLight(
-    params.sunColor,
-    0.75
-  )
-
+  const sun = new DirectionalLight(params.sunColor, 0.75)
   sun.position.set(10, 3.5, 7.5)
+  sun.castShadow = true
+
   scene.add(sun)
 
   const sunHelper = new DirectionalLightHelper(sun, 1)
@@ -88,24 +86,9 @@ loader.load('assets/STL_files/test_building.stl', geo => {
     .addColor(params, 'sunColor')
     .onChange(() => sun.color.set(params.sunColor))
 
-  gui
-    .add(sun.position, 'x')
-    .min(-20)
-    .max(20)
-    .step(0.001)
-    .name('Sun X')
-  gui
-    .add(sun.position, 'y')
-    .min(-20)
-    .max(20)
-    .step(0.001)
-    .name('Sun Y')
-  gui
-    .add(sun.position, 'z')
-    .min(-20)
-    .max(20)
-    .step(0.001)
-    .name('Sun Z')
+  gui.add(sun.position, 'x').min(-20).max(20).step(0.001).name('Sun X')
+  gui.add(sun.position, 'y').min(-20).max(20).step(0.001).name('Sun Y')
+  gui.add(sun.position, 'z').min(-20).max(20).step(0.001).name('Sun Z')
 
   /**************************************
    ******** Renderer
@@ -115,6 +98,7 @@ loader.load('assets/STL_files/test_building.stl', geo => {
     y: 720,
   }
   const renderer = new WebGLRenderer()
+  renderer.shadowMap.enabled = true
   renderer.setSize(viewportSize.x, viewportSize.y)
   document.querySelector('#main').appendChild(renderer.domElement)
 
@@ -151,6 +135,8 @@ loader.load('assets/STL_files/test_building.stl', geo => {
 
   const planeMesh = new Mesh(plane, planeMat)
   planeMesh.rotateX(Math.PI * -0.5)
+  planeMesh.receiveShadow = true
+
   scene.add(planeMesh)
 
   const geometry = new BoxGeometry()
@@ -167,6 +153,9 @@ loader.load('assets/STL_files/test_building.stl', geo => {
     .min(-3)
     .max(3)
     .step(0.01)
+
+  building.receiveShadow = true
+  building.castShadow = true
 
   scene.add(building)
 
