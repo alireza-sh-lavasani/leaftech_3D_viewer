@@ -22,6 +22,13 @@ import {
   Vector2,
   HemisphereLight,
   CameraHelper,
+  CubeTextureLoader,
+  sRGBEncoding,
+  ReinhardToneMapping,
+  CineonToneMapping,
+  ACESFilmicToneMapping,
+  NoToneMapping,
+  LinearToneMapping,
 } from 'three'
 import { onMounted, ref, render, watchEffect } from 'vue'
 // import gsap from 'gsap'
@@ -57,6 +64,22 @@ loader.load('assets/STL_files/test_building.stl', geo => {
   scene.background = new Color('#444d5c')
 
   /**************************************
+   ******** Environment
+   *************************************/
+  const cubeTexureLoader = new CubeTextureLoader()
+  const environment = cubeTexureLoader.load([
+    'assets/HDRI/_1/px.png',
+    'assets/HDRI/_1/nx.png',
+    'assets/HDRI/_1/py.png',
+    'assets/HDRI/_1/ny.png',
+    'assets/HDRI/_1/pz.png',
+    'assets/HDRI/_1/nz.png',
+  ])
+
+  scene.background = environment
+  scene.environment = environment
+
+  /**************************************
    ******** Camera
    *************************************/
   const camera = new PerspectiveCamera(
@@ -71,7 +94,7 @@ loader.load('assets/STL_files/test_building.stl', geo => {
    ******** Lights
    *************************************/
   const ambientLight = new AmbientLight(params.ambientColor, 0.4)
-  scene.add(ambientLight)
+  // scene.add(ambientLight)
 
   gui
     .addColor(params, 'ambientColor')
@@ -108,6 +131,17 @@ loader.load('assets/STL_files/test_building.stl', geo => {
   const renderer = new WebGLRenderer()
   renderer.shadowMap.enabled = true
   renderer.setSize(viewportSize.x, viewportSize.y)
+
+  renderer.outputEncoding = sRGBEncoding
+
+  gui.add(renderer, 'toneMapping', {
+    No: NoToneMapping,
+    Linear: LinearToneMapping,
+    Reinhard: ReinhardToneMapping,
+    CineonL: CineonToneMapping,
+    ACES: ACESFilmicToneMapping,
+  })
+
   document.querySelector('#main').appendChild(renderer.domElement)
 
   /**************************************
@@ -138,6 +172,8 @@ loader.load('assets/STL_files/test_building.stl', geo => {
     wireframe: false,
   })
 
+  material.envMapIntensity = 1
+
   gui.add(material, 'metalness').min(0).max(1).step(0.001)
   gui.add(material, 'roughness').min(0).max(1).step(0.001)
 
@@ -150,7 +186,7 @@ loader.load('assets/STL_files/test_building.stl', geo => {
    ******** Mesh
    *************************************/
   const plane = new PlaneGeometry(15, 15)
-  const planeMat = new MeshPhongMaterial({ color: '#fff' })
+  const planeMat = new MeshStandardMaterial({ color: '#fff' })
 
   const planeMesh = new Mesh(plane, planeMat)
   planeMesh.rotateX(Math.PI * -0.5)
