@@ -12,6 +12,13 @@ import {
   AxesHelper,
   Clock,
   Vector3,
+  AmbientLight,
+  MeshLambertMaterial,
+  MeshPhongMaterial,
+  DirectionalLight,
+  PlaneGeometry,
+  DoubleSide,
+  DirectionalLightHelper,
 } from 'three'
 import { onMounted, ref, watchEffect } from 'vue'
 // import gsap from 'gsap'
@@ -34,7 +41,9 @@ loader.load('assets/STL_files/test_building.stl', geo => {
    *************************************/
   const params = {
     color: '#fff',
-    lightColor: '#fff',
+    directionalLightColor: '#ffffe8',
+    ambientLightColor: '#c5dde0',
+    shine: 10,
   }
 
   /**************************************
@@ -57,13 +66,47 @@ loader.load('assets/STL_files/test_building.stl', geo => {
   /**************************************
    ******** Light
    *************************************/
-  const light = new SpotLight('hsl(0, 100%, 100%)')
-  light.position.set(10, 5, 5)
-  scene.add(light)
+  const ambientLight = new AmbientLight(params.ambientLightColor, 0.4)
+  scene.add(ambientLight)
 
   gui
-    .addColor(params, 'lightColor')
-    .onChange(() => light.color.set(params.lightColor))
+    .addColor(params, 'ambientLightColor')
+    .onChange(() => ambientLight.color.set(params.ambientLightColor))
+
+  const directionalLight = new DirectionalLight(
+    params.directionalLightColor,
+    0.75
+  )
+
+  directionalLight.position.set(10, 3.5, 7.5)
+  scene.add(directionalLight)
+
+  const sun = new DirectionalLightHelper(directionalLight, 1)
+  scene.add(sun)
+
+  gui
+    .addColor(params, 'directionalLightColor')
+    .onChange(() => directionalLight.color.set(params.directionalLightColor))
+
+  gui
+    .add(directionalLight.position, 'x')
+    .min(-20)
+    .max(20)
+    .step(0.001)
+    .name('Sun X')
+  gui
+    .add(directionalLight.position, 'y')
+    .min(-20)
+    .max(20)
+    .step(0.001)
+    .name('Sun Y')
+  gui
+    .add(directionalLight.position, 'z')
+    .min(-20)
+    .max(20)
+    .step(0.001)
+    .name('Sun Z')
+
   /**************************************
    ******** Renderer
    *************************************/
@@ -84,17 +127,31 @@ loader.load('assets/STL_files/test_building.stl', geo => {
   controls.dampingFactor = 0.1
 
   /**************************************
-   ******** Mesh
+   ******** Materials
    *************************************/
   const material = new MeshStandardMaterial({
     side: FrontSide,
     color: params.color,
     wireframe: false,
   })
+
+  gui.add(material, 'metalness').min(0).max(1).step(0.001)
+  gui.add(material, 'roughness').min(0).max(1).step(0.001)
+
   gui
     .addColor(params, 'color')
     .onChange(() => material.color.set(params.color))
     .name('Building Color')
+
+  /**************************************
+   ******** Mesh
+   *************************************/
+  const plane = new PlaneGeometry(15, 15)
+  const planeMat = new MeshPhongMaterial({ color: '#fff' })
+
+  const planeMesh = new Mesh(plane, planeMat)
+  planeMesh.rotateX(Math.PI * -0.5)
+  scene.add(planeMesh)
 
   const geometry = new BoxGeometry()
   const cube = new Mesh(geometry, material)
