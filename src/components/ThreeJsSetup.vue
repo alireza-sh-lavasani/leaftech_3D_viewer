@@ -41,8 +41,8 @@ loader.load('assets/STL_files/test_building.stl', geo => {
    *************************************/
   const params = {
     color: '#fff',
-    directionalLightColor: '#ffffe8',
-    ambientLightColor: '#c5dde0',
+    sunColor: '#ffffe8',
+    ambientColor: '#c5dde0',
     shine: 10,
   }
 
@@ -66,42 +66,42 @@ loader.load('assets/STL_files/test_building.stl', geo => {
   /**************************************
    ******** Light
    *************************************/
-  const ambientLight = new AmbientLight(params.ambientLightColor, 0.4)
+  const ambientLight = new AmbientLight(params.ambientColor, 0.4)
   scene.add(ambientLight)
 
   gui
-    .addColor(params, 'ambientLightColor')
-    .onChange(() => ambientLight.color.set(params.ambientLightColor))
+    .addColor(params, 'ambientColor')
+    .onChange(() => ambientLight.color.set(params.ambientColor))
 
-  const directionalLight = new DirectionalLight(
-    params.directionalLightColor,
+  const sun = new DirectionalLight(
+    params.sunColor,
     0.75
   )
 
-  directionalLight.position.set(10, 3.5, 7.5)
-  scene.add(directionalLight)
-
-  const sun = new DirectionalLightHelper(directionalLight, 1)
+  sun.position.set(10, 3.5, 7.5)
   scene.add(sun)
 
-  gui
-    .addColor(params, 'directionalLightColor')
-    .onChange(() => directionalLight.color.set(params.directionalLightColor))
+  const sunHelper = new DirectionalLightHelper(sun, 1)
+  scene.add(sunHelper)
 
   gui
-    .add(directionalLight.position, 'x')
+    .addColor(params, 'sunColor')
+    .onChange(() => sun.color.set(params.sunColor))
+
+  gui
+    .add(sun.position, 'x')
     .min(-20)
     .max(20)
     .step(0.001)
     .name('Sun X')
   gui
-    .add(directionalLight.position, 'y')
+    .add(sun.position, 'y')
     .min(-20)
     .max(20)
     .step(0.001)
     .name('Sun Y')
   gui
-    .add(directionalLight.position, 'z')
+    .add(sun.position, 'z')
     .min(-20)
     .max(20)
     .step(0.001)
@@ -203,6 +203,8 @@ loader.load('assets/STL_files/test_building.stl', geo => {
 
     // required if controls.enableDamping or controls.autoRotate are set to true
     controls.update()
+
+    sunHelper.update()
 
     /**************************************
      ******** Render
