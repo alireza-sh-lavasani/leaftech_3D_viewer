@@ -19,11 +19,15 @@ import {
   PlaneGeometry,
   DoubleSide,
   DirectionalLightHelper,
+  Vector2,
+  HemisphereLight,
+  CameraHelper,
 } from 'three'
 import { onMounted, ref, render, watchEffect } from 'vue'
 // import gsap from 'gsap'
 import STLLoader from './loaders/STLLoader'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js'
+import { TransformControls } from 'three/examples/jsm/controls/TransformControls.js'
 import { GUI } from 'dat.gui'
 
 /**************************************
@@ -76,19 +80,23 @@ loader.load('assets/STL_files/test_building.stl', geo => {
   const sun = new DirectionalLight(params.sunColor, 0.75)
   sun.position.set(10, 3.5, 7.5)
   sun.castShadow = true
+  sun.shadow.mapSize = new Vector2(4096, 4096)
+  sun.shadow.camera.far = 25
 
   scene.add(sun)
 
   const sunHelper = new DirectionalLightHelper(sun, 1)
   scene.add(sunHelper)
 
+  const sunCamHelper = new CameraHelper(sun.shadow.camera)
+  sunCamHelper.visible = false
+  scene.add(sunCamHelper)
+
+  gui.add(sunCamHelper, 'visible').name('sunCamHelper')
+  gui.add(sunHelper, 'visible').name('sunHelper')
   gui
     .addColor(params, 'sunColor')
     .onChange(() => sun.color.set(params.sunColor))
-
-  gui.add(sun.position, 'x').min(-20).max(20).step(0.001).name('Sun X')
-  gui.add(sun.position, 'y').min(-20).max(20).step(0.001).name('Sun Y')
-  gui.add(sun.position, 'z').min(-20).max(20).step(0.001).name('Sun Z')
 
   /**************************************
    ******** Renderer
@@ -105,10 +113,21 @@ loader.load('assets/STL_files/test_building.stl', geo => {
   /**************************************
    ******** Controls
    *************************************/
-  const controls = new OrbitControls(camera, renderer.domElement)
-  // controls.autoRotate = true
-  controls.enableDamping = true
-  controls.dampingFactor = 0.1
+  const orbitControls = new OrbitControls(camera, renderer.domElement)
+  // orbitControls.autoRotate = true
+  orbitControls.enableDamping = true
+  orbitControls.dampingFactor = 0.1
+
+  const transformControl = new TransformControls(camera, renderer.domElement)
+
+  transformControl.addEventListener('dragging-changed', function (event) {
+    orbitControls.enabled = !event.value
+  })
+
+  transformControl.attach(sun)
+  scene.add(transformControl)
+
+  gui.add(transformControl, 'visible').name('showSunTransform')
 
   /**************************************
    ******** Materials
@@ -191,7 +210,7 @@ loader.load('assets/STL_files/test_building.stl', geo => {
     // camera.position.y = cursor.y
 
     // required if controls.enableDamping or controls.autoRotate are set to true
-    controls.update()
+    orbitControls.update()
 
     sunHelper.update()
 
