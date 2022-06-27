@@ -100,7 +100,7 @@ const camera = new PerspectiveCamera(
   0.1,
   1000
 )
-camera.position.set(3, 3, 9)
+camera.position.set(30, 30, 70)
 
 /**************************************
  ******** Lights
@@ -124,14 +124,14 @@ camera.position.set(3, 3, 9)
 
 // scene.add(sun)
 
-const sun2 = new DirectionalLight(params.sunColor, 3.5)
+const sun2 = new DirectionalLight(params.sunColor, 3)
 sun2.position.set(50, 30, 50)
 sun2.castShadow = true
 
 sun2.shadow.mapSize = new Vector2(4096, 4096)
 sun2.shadow.camera.far = 250
-sun2.shadow.camera.left = -150
-sun2.shadow.camera.right = 150
+sun2.shadow.camera.left = -50
+sun2.shadow.camera.right = 50
 sun2.shadow.camera.top = 50
 sun2.shadow.camera.bottom = -50
 
@@ -142,7 +142,7 @@ scene.add(sun2)
 
 const sunCamHelper = new CameraHelper(sun2.shadow.camera)
 sunCamHelper.visible = true
-scene.add(sunCamHelper)
+// scene.add(sunCamHelper)
 
 // gui.add(sunCamHelper, 'visible').name('sunCamHelper')
 // gui.add(sunHelper, 'visible').name('sunHelper')
@@ -443,12 +443,74 @@ gltfLoader.load('assets/glTF/baseBuilding.glb', baseBuilding => {
 /**************************************
  ******** Surrounding Buildings
  *************************************/
+const surroundingParams = {
+  visible: true,
+}
+
 gltfLoader.load(
   'assets/glTF/surroundingBuildings.glb',
   surroundingBuildings => {
+    // GUI
+    gui
+      .add(surroundingParams, 'visible')
+      .name('Surroundings')
+      .onChange(() =>
+        surroundingBuildings.scene.traverse(object => {
+          if (object.isMesh) {
+            object.visible = surroundingParams.visible
+          }
+        })
+      )
+
     scene.add(surroundingBuildings.scene)
   }
 )
+
+/**************************************
+ ******** Trees
+ *************************************/
+const treesParams = {
+  visible: true,
+}
+
+gltfLoader.load('assets/glTF/trees.glb', trees => {
+  // GUI
+  gui
+    .add(treesParams, 'visible')
+    .name('Trees')
+    .onChange(() =>
+      trees.scene.traverse(object => {
+        if (object.isMesh) {
+          object.visible = treesParams.visible
+        }
+      })
+    )
+
+  scene.add(trees.scene)
+})
+
+/**************************************
+ ******** Window Glasses
+ *************************************/
+const glassesParams = {
+  visible: true,
+}
+
+gltfLoader.load('assets/glTF/glasses.glb', glasses => {
+  // GUI
+  gui
+    .add(glassesParams, 'visible')
+    .name('Glasses')
+    .onChange(() =>
+      glasses.scene.traverse(object => {
+        if (object.isMesh) {
+          object.visible = glassesParams.visible
+        }
+      })
+    )
+
+  scene.add(glasses.scene)
+})
 
 /**************************************
  ******** Particles
