@@ -3,32 +3,14 @@ import {
   Scene,
   PerspectiveCamera,
   WebGLRenderer,
-  BoxGeometry,
-  MeshStandardMaterial,
-  Mesh,
-  FrontSide,
   Color,
-  SpotLight,
   AxesHelper,
   Clock,
-  Vector3,
-  AmbientLight,
-  MeshLambertMaterial,
-  MeshPhongMaterial,
   DirectionalLight,
-  PlaneGeometry,
-  DoubleSide,
-  DirectionalLightHelper,
   Vector2,
-  HemisphereLight,
   CameraHelper,
   CubeTextureLoader,
   sRGBEncoding,
-  ReinhardToneMapping,
-  CineonToneMapping,
-  ACESFilmicToneMapping,
-  NoToneMapping,
-  LinearToneMapping,
   BufferGeometry,
   PointsMaterial,
   Points,
@@ -39,9 +21,6 @@ import { onMounted, ref, render, watchEffect } from 'vue'
 // import gsap from 'gsap'
 import STLLoader from './loaders/STLLoader'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
-import { TransformControls } from 'three/examples/jsm/controls/TransformControls'
-import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer'
-import { SSAOPass } from 'three/examples/jsm/postprocessing/SSAOPass'
 import { GUI } from 'dat.gui'
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import sensorsData from '../assets/sensorsData'
