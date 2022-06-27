@@ -28,7 +28,6 @@ import sensorsData from '../assets/sensorsData'
 /**************************************
  ******** Model Loaders
  *************************************/
-const stlLoader = new STLLoader()
 const gltfLoader = new GLTFLoader()
 
 /**************************************
@@ -37,6 +36,7 @@ const gltfLoader = new GLTFLoader()
 const gui = new GUI()
 const sceneSetup = gui.addFolder('Scene Setup')
 const sunSetup = gui.addFolder('Sun Setup')
+const sensorsLayers = gui.addFolder('sensors')
 
 /**************************************
  ******** Parameters
@@ -387,6 +387,9 @@ sensorsGroup.add(sensors)
 sensorsGroup.rotateX(Math.PI * -0.5)
 
 entireScene.add(sensorsGroup)
+
+// GUI
+sensorsLayers.add(sensorsGroup, 'visible').name('Sun Hours')
 
 /**************************************
  ******** Y Rotation Fix
