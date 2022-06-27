@@ -125,77 +125,31 @@ const camera = new PerspectiveCamera(
 )
 camera.position.set(30, 20, 70)
 
-/**************************************
- ******** Lights
- *************************************/
-// const ambientLight = new AmbientLight(params.ambientColor, 0.75)
-// scene.add(ambientLight)
+const sun = new DirectionalLight(params.sunColor, 3)
+sun.position.set(-50, 30, 50)
+sun.castShadow = true
 
-// gui
-//   .addColor(params, 'ambientColor')
-//   .onChange(() => ambientLight.color.set(params.ambientColor))
+sun.shadow.mapSize = new Vector2(4096, 4096)
+sun.shadow.camera.far = 300
+sun.shadow.camera.left = -50
+sun.shadow.camera.right = 50
+sun.shadow.camera.top = 50
+sun.shadow.camera.bottom = -50
 
-// const sun = new DirectionalLight(params.sunColor, 2)
-// sun.position.set(100, 35, 75)
-// sun.castShadow = true
-// sun.shadow.mapSize = new Vector2(4096, 4096)
-// sun.shadow.camera.far = 250
-// sun.shadow.camera.left = -250
-// sun.shadow.camera.right = 250
-// sun.shadow.camera.top = 250
-// sun.shadow.camera.bottom = -250
+scene.add(sun)
 
-// scene.add(sun)
-
-const sun2 = new DirectionalLight(params.sunColor, 3)
-sun2.position.set(-50, 30, 50)
-sun2.castShadow = true
-
-sun2.shadow.mapSize = new Vector2(4096, 4096)
-sun2.shadow.camera.far = 300
-sun2.shadow.camera.left = -50
-sun2.shadow.camera.right = 50
-sun2.shadow.camera.top = 50
-sun2.shadow.camera.bottom = -50
-
-scene.add(sun2)
-
-const sunCamHelper = new CameraHelper(sun2.shadow.camera)
+const sunCamHelper = new CameraHelper(sun.shadow.camera)
 sunCamHelper.visible = false
 scene.add(sunCamHelper)
 
 // GUI
 sunSetup.add(sunCamHelper, 'visible').name('Sun Shaper')
-sunSetup.add(sun2.position, 'x').name('Sun X').min(-200).max(200).step(0.001)
-sunSetup.add(sun2.position, 'y').name('Sun Y').min(-200).max(200).step(0.001)
-sunSetup.add(sun2.position, 'z').name('Sun Z').min(-200).max(200).step(0.001)
+sunSetup.add(sun.position, 'x').name('Sun X').min(-200).max(200).step(0.001)
+sunSetup.add(sun.position, 'y').name('Sun Y').min(-200).max(200).step(0.001)
+sunSetup.add(sun.position, 'z').name('Sun Z').min(-200).max(200).step(0.001)
 
 // const sunHelper = new DirectionalLightHelper(sun, 1)
 // scene.add(sunHelper)
-
-// gui.add(sunCamHelper, 'visible').name('sunCamHelper')
-// gui.add(sunHelper, 'visible').name('sunHelper')
-// gui.addColor(params, 'sunColor').onChange(() => sun.color.set(params.sunColor))
-
-// Bounce light
-// const bounce = new DirectionalLight(params.sunColor, 1)
-// bounce.position.set(0, 3.5, -7.5)
-// bounce.castShadow = false
-
-// scene.add(bounce)
-
-// const bounceHelper = new DirectionalLightHelper(bounce, 1)
-// scene.add(bounceHelper)
-
-// const bounceCamHelper = new CameraHelper(bounce.shadow.camera)
-// bounceCamHelper.visible = false
-// scene.add(bounceCamHelper)
-
-// gui.add(bounceCamHelper, 'visible').name('bounceCamHelper')
-// gui.add(bounceHelper, 'visible').name('bounceHelper')
-// gui
-//   .addColor(params, 'bounceColor')
-//   .onChange(() => bounce.color.set(params.bounceColor))
 
 /**************************************
  ******** Renderer
@@ -211,14 +165,6 @@ renderer.physicallyCorrectLights = true
 
 renderer.outputEncoding = sRGBEncoding
 
-// gui.add(renderer, 'toneMapping', {
-//   No: NoToneMapping,
-//   Linear: LinearToneMapping,
-//   Reinhard: ReinhardToneMapping,
-//   CineonL: CineonToneMapping,
-//   ACES: ACESFilmicToneMapping,
-// })
-
 /**************************************
  ******** Controls
  *************************************/
@@ -226,60 +172,6 @@ const orbitControls = new OrbitControls(camera, renderer.domElement)
 // orbitControls.autoRotate = true
 orbitControls.enableDamping = true
 orbitControls.dampingFactor = 0.1
-
-// const transformControl = new TransformControls(camera, renderer.domElement)
-
-// transformControl.addEventListener('dragging-changed', function (event) {
-//   orbitControls.enabled = !event.value
-// })
-
-// transformControl.attach(sun)
-// scene.add(transformControl)
-
-// gui.add(transformControl, 'visible').name('showSunTransform')
-
-/**************************************
- ******** Post Processing
- *************************************/
-// const composer = new EffectComposer(renderer)
-// const ssaoPass = new SSAOPass(scene, camera, viewportSize.x, viewportSize.y)
-// ssaoPass.kernelRadius = 16
-// composer.addPass(ssaoPass)
-
-// gui
-//   .add(ssaoPass, 'output', {
-//     Default: SSAOPass.OUTPUT.Default,
-//     'SSAO Only': SSAOPass.OUTPUT.SSAO,
-//     'SSAO Only + Blur': SSAOPass.OUTPUT.Blur,
-//     Beauty: SSAOPass.OUTPUT.Beauty,
-//     Depth: SSAOPass.OUTPUT.Depth,
-//     Normal: SSAOPass.OUTPUT.Normal,
-//   })
-//   .onChange(function (value) {
-//     ssaoPass.output = parseInt(value)
-//   })
-// gui.add(ssaoPass, 'kernelRadius').min(0).max(4096)
-// gui.add(ssaoPass, 'minDistance').min(0.001).max(0.02)
-// gui.add(ssaoPass, 'maxDistance').min(0.01).max(0.3)
-
-/**************************************
- ******** Materials
- *************************************/
-const material = new MeshStandardMaterial({
-  side: FrontSide,
-  color: params.color,
-  wireframe: false,
-})
-
-material.envMapIntensity = 1
-
-// gui.add(material, 'metalness').min(0).max(1).step(0.001)
-// gui.add(material, 'roughness').min(0).max(1).step(0.001)
-
-// gui
-//   .addColor(params, 'color')
-//   .onChange(() => material.color.set(params.color))
-//   .name('Building Color')
 
 /**************************************
  ******** Color Ramp
@@ -318,13 +210,6 @@ var ramp = new ColorRamp([
   new Color('#FBC2F9'),
 ])
 
-// gui
-//   .add(params, 'cubeColor')
-//   .min(0)
-//   .max(0.5)
-//   .step(0.001)
-//   .onChange(() => cubeMat.color.set(ramp.at(params.cubeColor)))
-
 /**************************************
  ******** Range conversion
  *************************************/
@@ -339,74 +224,6 @@ const rangeConverter = (
 
   return newValue
 }
-
-/**************************************
- ******** Mesh
- *************************************/
-const plane = new PlaneGeometry(15, 15)
-const planeMat = new MeshStandardMaterial({ color: '#fff' })
-
-const planeMesh = new Mesh(plane, planeMat)
-planeMesh.rotateX(Math.PI * -0.5)
-planeMesh.receiveShadow = true
-
-// scene.add(planeMesh)
-
-const geometry = new BoxGeometry()
-
-const cubeMat = new MeshStandardMaterial({
-  color: ramp.at(params.cubeColor),
-})
-
-const cube = new Mesh(geometry, cubeMat)
-cube.position.set(2, 0.5, 0)
-cube.castShadow = true
-
-// scene.add(cube)
-
-/**************************************
- ******** Building
- *************************************/
-stlLoader.load('assets/STL_files/test_building.stl', geo => {
-  const building = new Mesh(geo, material)
-  // gui
-  //   .add(building.position, 'x')
-  //   .name('Test Position')
-  //   .min(-3)
-  //   .max(3)
-  //   .step(0.01)
-
-  building.receiveShadow = true
-  building.castShadow = true
-
-  // scene.add(building)
-})
-
-/**************************************
- ******** Helmet
- *************************************/
-gltfLoader.load('assets/glTF/FlightHelmet.gltf', gltf => {
-  gltf.scene.traverse(object => {
-    if (object.isMesh) object.castShadow = true
-  })
-
-  // scene.add(gltf.scene)
-})
-
-/**************************************
- ******** Building GLTF
- *************************************/
-gltfLoader.load('assets/glTF/building.glb', building_gltf => {
-  building_gltf.scene.traverse(object => {
-    if (object.isMesh) {
-      object.castShadow = true
-      object.receiveShadow = true
-    }
-  })
-
-  // group.add(building_gltf.scene)
-  // scene.add(group)
-})
 
 /**************************************
  ******** Entire Scene Group
@@ -441,7 +258,6 @@ gltfLoader.load('assets/glTF/terrain.glb', terrain => {
     )
 
   entireScene.add(terrain.scene)
-  // scene.add(terrain.scene)
 })
 
 /**************************************
@@ -472,7 +288,6 @@ gltfLoader.load('assets/glTF/baseBuilding.glb', baseBuilding => {
     )
 
   entireScene.add(baseBuilding.scene)
-  // scene.add(baseBuilding.scene)
 })
 
 /**************************************
@@ -498,7 +313,6 @@ gltfLoader.load(
       )
 
     entireScene.add(surroundingBuildings.scene)
-    // scene.add(surroundingBuildings.scene)
   }
 )
 
@@ -523,7 +337,6 @@ gltfLoader.load('assets/glTF/trees.glb', trees => {
     )
 
   entireScene.add(trees.scene)
-  // scene.add(trees.scene)
 })
 
 /**************************************
@@ -547,7 +360,6 @@ gltfLoader.load('assets/glTF/glasses.glb', glasses => {
     )
 
   entireScene.add(glasses.scene)
-  // scene.add(glasses.scene)
 })
 
 /**************************************
@@ -576,7 +388,6 @@ sensorsData.forEach(({ utmX, utmY, utmZ, sun_hours }) => {
 })
 
 for (let i = 0; i < count * 3; i++) {
-  // sensorPositions[i] = (Math.random() - 0.5) * 10
   sensorPositions[i] = flatPositions[i]
   sensorColors[i] = rgbFlatColors[i]
 }
@@ -597,7 +408,6 @@ sensorsGroup.add(sensors)
 sensorsGroup.rotateX(Math.PI * -0.5)
 
 entireScene.add(sensorsGroup)
-// scene.add(sensorsGroup)
 
 /**************************************
  ******** Y Rotation Fix
@@ -612,41 +422,19 @@ scene.add(axes)
 
 const clock = new Clock()
 
-/**************************************
- ******** Animatations
- *************************************/
-// gsap.to(cube.position, { x: 2, duration: 2 })
-// gsap.to(cube.position, { x: 0, duration: 2, delay: 2 })
-
 const tick = () => {
   // Time
   const elapsedTime = clock.getElapsedTime()
-
-  // Object transformations
-  // camera.position.y = Math.sin(elapsedTime * 1)
-  // camera.position.x = Math.cos(elapsedTime * 1)
-  // camera.lookAt(cube.position)
-
-  // camera.position.x = Math.sin(cursor.value.x * -2 * Math.PI) * 10
-  // camera.position.z = Math.cos(cursor.value.x * -2 * Math.PI) * 10
-  // camera.position.y = cursor.value.y * 10
-  // camera.lookAt(new Vector3(0))
-
-  // camera.position.x = cursor.x
-  // camera.position.y = cursor.y
 
   // required if controls.enableDamping or controls.autoRotate are set to true
   orbitControls.update()
 
   // sunHelper.update()
-  // bounceHelper.update()
 
   /**************************************
    ******** Render
    *************************************/
   renderer.render(scene, camera)
-  // composer.render()
-
   requestAnimationFrame(tick)
 }
 
