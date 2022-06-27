@@ -56,6 +56,8 @@ const gltfLoader = new GLTFLoader()
  ******** GUI
  *************************************/
 const gui = new GUI()
+const sceneSetup = gui.addFolder('Scene Setup')
+const sunSetup = gui.addFolder('Sun Setup')
 
 /**************************************
  ******** Parameters
@@ -73,7 +75,6 @@ const params = {
  ******** Scene
  *************************************/
 const scene = new Scene()
-scene.background = new Color('#444d5c')
 
 /**************************************
  ******** Environment
@@ -88,8 +89,30 @@ const environment = cubeTexureLoader.load([
   'assets/HDRI/_1/nz.png',
 ])
 
-scene.background = environment
+const backgroundParams = {
+  visible_env: true,
+  background_color: '#9ba3b0',
+}
+
+scene.background = backgroundParams.visible_env
+  ? environment
+  : backgroundParams.background_color
 scene.environment = environment
+
+// GUI
+
+sceneSetup
+  .add(backgroundParams, 'visible_env')
+  .name('Visible ENV')
+  .onChange(() => {
+    scene.background = backgroundParams.visible_env
+      ? environment
+      : new Color(backgroundParams.background_color)
+  })
+
+sceneSetup.addColor(backgroundParams, 'background_color').onChange(() => {
+  scene.background = new Color(backgroundParams.background_color)
+})
 
 /**************************************
  ******** Camera
@@ -100,7 +123,7 @@ const camera = new PerspectiveCamera(
   0.1,
   1000
 )
-camera.position.set(30, 30, 70)
+camera.position.set(30, 20, 70)
 
 /**************************************
  ******** Lights
@@ -125,11 +148,11 @@ camera.position.set(30, 30, 70)
 // scene.add(sun)
 
 const sun2 = new DirectionalLight(params.sunColor, 3)
-sun2.position.set(50, 30, 50)
+sun2.position.set(-50, 30, 50)
 sun2.castShadow = true
 
 sun2.shadow.mapSize = new Vector2(4096, 4096)
-sun2.shadow.camera.far = 250
+sun2.shadow.camera.far = 300
 sun2.shadow.camera.left = -50
 sun2.shadow.camera.right = 50
 sun2.shadow.camera.top = 50
@@ -137,12 +160,18 @@ sun2.shadow.camera.bottom = -50
 
 scene.add(sun2)
 
+const sunCamHelper = new CameraHelper(sun2.shadow.camera)
+sunCamHelper.visible = false
+scene.add(sunCamHelper)
+
+// GUI
+sunSetup.add(sunCamHelper, 'visible').name('Sun Shaper')
+sunSetup.add(sun2.position, 'x').name('Sun X').min(-200).max(200).step(0.001)
+sunSetup.add(sun2.position, 'y').name('Sun Y').min(-200).max(200).step(0.001)
+sunSetup.add(sun2.position, 'z').name('Sun Z').min(-200).max(200).step(0.001)
+
 // const sunHelper = new DirectionalLightHelper(sun, 1)
 // scene.add(sunHelper)
-
-const sunCamHelper = new CameraHelper(sun2.shadow.camera)
-sunCamHelper.visible = true
-// scene.add(sunCamHelper)
 
 // gui.add(sunCamHelper, 'visible').name('sunCamHelper')
 // gui.add(sunHelper, 'visible').name('sunHelper')
@@ -367,8 +396,6 @@ gltfLoader.load('assets/glTF/FlightHelmet.gltf', gltf => {
 /**************************************
  ******** Building GLTF
  *************************************/
-const group = new Group()
-
 gltfLoader.load('assets/glTF/building.glb', building_gltf => {
   building_gltf.scene.traverse(object => {
     if (object.isMesh) {
@@ -380,6 +407,12 @@ gltfLoader.load('assets/glTF/building.glb', building_gltf => {
   // group.add(building_gltf.scene)
   // scene.add(group)
 })
+
+/**************************************
+ ******** Entire Scene Group
+ *************************************/
+const entireScene = new Group()
+scene.add(entireScene)
 
 /**************************************
  ******** Terrain
@@ -396,7 +429,7 @@ gltfLoader.load('assets/glTF/terrain.glb', terrain => {
   })
 
   // GUI
-  gui
+  sceneSetup
     .add(terrainParams, 'visible')
     .name('Terrain')
     .onChange(() =>
@@ -407,7 +440,8 @@ gltfLoader.load('assets/glTF/terrain.glb', terrain => {
       })
     )
 
-  scene.add(terrain.scene)
+  entireScene.add(terrain.scene)
+  // scene.add(terrain.scene)
 })
 
 /**************************************
@@ -426,7 +460,7 @@ gltfLoader.load('assets/glTF/baseBuilding.glb', baseBuilding => {
   })
 
   // GUI
-  gui
+  sceneSetup
     .add(baseBuildingParams, 'visible')
     .name('Base Building')
     .onChange(() =>
@@ -437,7 +471,8 @@ gltfLoader.load('assets/glTF/baseBuilding.glb', baseBuilding => {
       })
     )
 
-  scene.add(baseBuilding.scene)
+  entireScene.add(baseBuilding.scene)
+  // scene.add(baseBuilding.scene)
 })
 
 /**************************************
@@ -451,7 +486,7 @@ gltfLoader.load(
   'assets/glTF/surroundingBuildings.glb',
   surroundingBuildings => {
     // GUI
-    gui
+    sceneSetup
       .add(surroundingParams, 'visible')
       .name('Surroundings')
       .onChange(() =>
@@ -462,7 +497,8 @@ gltfLoader.load(
         })
       )
 
-    scene.add(surroundingBuildings.scene)
+    entireScene.add(surroundingBuildings.scene)
+    // scene.add(surroundingBuildings.scene)
   }
 )
 
@@ -475,7 +511,7 @@ const treesParams = {
 
 gltfLoader.load('assets/glTF/trees.glb', trees => {
   // GUI
-  gui
+  sceneSetup
     .add(treesParams, 'visible')
     .name('Trees')
     .onChange(() =>
@@ -486,7 +522,8 @@ gltfLoader.load('assets/glTF/trees.glb', trees => {
       })
     )
 
-  scene.add(trees.scene)
+  entireScene.add(trees.scene)
+  // scene.add(trees.scene)
 })
 
 /**************************************
@@ -498,7 +535,7 @@ const glassesParams = {
 
 gltfLoader.load('assets/glTF/glasses.glb', glasses => {
   // GUI
-  gui
+  sceneSetup
     .add(glassesParams, 'visible')
     .name('Glasses')
     .onChange(() =>
@@ -509,12 +546,14 @@ gltfLoader.load('assets/glTF/glasses.glb', glasses => {
       })
     )
 
-  scene.add(glasses.scene)
+  entireScene.add(glasses.scene)
+  // scene.add(glasses.scene)
 })
 
 /**************************************
  ******** Particles
  *************************************/
+const sensorsGroup = new Group()
 
 // Placement
 const sensorsGeo = new BufferGeometry()
@@ -554,10 +593,16 @@ const sensorsMat = new PointsMaterial({
 
 const sensors = new Points(sensorsGeo, sensorsMat)
 
-group.add(sensors)
-group.rotateX(Math.PI * -0.5)
+sensorsGroup.add(sensors)
+sensorsGroup.rotateX(Math.PI * -0.5)
 
-scene.add(group)
+entireScene.add(sensorsGroup)
+// scene.add(sensorsGroup)
+
+/**************************************
+ ******** Y Rotation Fix
+ *************************************/
+entireScene.rotateY(Math.PI * -0.36)
 
 /**************************************
  ******** Axes
@@ -620,4 +665,9 @@ onMounted(() => {
   <main id="main"></main>
 </template>
 
-<style></style>
+<style>
+h1 {
+  color: black;
+  font-weight: bold;
+}
+</style>
