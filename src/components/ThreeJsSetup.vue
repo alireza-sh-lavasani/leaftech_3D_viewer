@@ -39,16 +39,19 @@ import sensorsData from '../assets/sensorsData'
  ******** Loaders
  *************************************/
 const onLoad = () => {
-  document.querySelector('#loading-text').style.opacity = 0
-  document.querySelector('#loading-bar').classList.add('ended')
-  document.querySelector('#loading-bar').style.transform = ''
+  gsap.delayedCall(0.5, () => {
+    document.querySelector('#loading-text').style.opacity = 0
+    document.querySelector('#loading-bar').style.transform = 'scaleX(0)'
+    document.querySelector('#loading-bar').classList.add('ended')
 
-  setTimeout(
-    () => (document.querySelector('#loading-container').style.display = 'none'),
-    2000
-  )
+    setTimeout(
+      () =>
+        (document.querySelector('#loading-container').style.display = 'none'),
+      2000
+    )
 
-  gsap.to(overlayMat.uniforms.uAlpha, { duration: 3, value: 0 })
+    gsap.to(overlayMat.uniforms.uAlpha, { duration: 2, value: 0 })
+  })
 }
 
 const onProgress = (iteUrl, itemsLoaded, itemsTotal) => {
@@ -561,9 +564,9 @@ h1 {
 }
 
 #loading-bar.ended {
-  transform: scaleX(0);
   transform-origin: top right;
-  transition: transform 1.75s ease-in-out;
+  transition: transform 0.5s ease-in-out;
+  will-change: transform;
 }
 
 #loading-text {
@@ -572,6 +575,6 @@ h1 {
   font-size: 5em;
   font-family: 'Exo', sans-serif;
   margin-bottom: 0.5em;
-  transition: opacity 1.75s;
+  transition: opacity 0.5s;
 }
 </style>
