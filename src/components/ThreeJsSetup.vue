@@ -28,7 +28,7 @@ import {
   LoadingManager,
 } from 'three'
 import { onMounted, ref, render, watchEffect } from 'vue'
-// import gsap from 'gsap'
+import gsap from 'gsap'
 import STLLoader from './loaders/STLLoader'
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls'
 import { GUI } from 'dat.gui'
@@ -38,9 +38,24 @@ import sensorsData from '../assets/sensorsData'
 /**************************************
  ******** Loaders
  *************************************/
-const onLoad = () => {}
+const onLoad = () => {
+  document.querySelector('#loading-text').style.opacity = 0
+  document.querySelector('#loading-bar').classList.add('ended')
+  document.querySelector('#loading-bar').style.transform = ''
 
-const onProgress = () => {}
+  setTimeout(
+    () => (document.querySelector('#loading-container').style.display = 'none'),
+    2000
+  )
+
+  gsap.to(overlayMat.uniforms.uAlpha, { duration: 3, value: 0 })
+}
+
+const onProgress = (iteUrl, itemsLoaded, itemsTotal) => {
+  document.querySelector('#loading-bar').style.transform = `scaleX(${
+    itemsLoaded / itemsTotal
+  })`
+}
 
 const onError = () => {}
 
@@ -177,7 +192,7 @@ const overlayGeo = new PlaneBufferGeometry(2, 2, 1, 1)
 const overlayMat = new ShaderMaterial({
   transparent: true,
   uniforms: {
-    uAlpha: { value: 0 },
+    uAlpha: { value: 1 },
   },
   vertexShader: ` 
   void main() {
@@ -188,7 +203,7 @@ const overlayMat = new ShaderMaterial({
     uniform float uAlpha;
 
     void main() {
-    gl_FragColor = vec4( 0.0, 0.0, 0.0, uAlpha );
+    gl_FragColor = vec4( 1.0, 1.0, 1.0, uAlpha );
   }
   `,
 })
@@ -286,7 +301,7 @@ gltfLoader.load('assets/glTF/terrain.glb', terrain => {
       })
     )
 
-  // entireScene.add(terrain.scene)
+  entireScene.add(terrain.scene)
 })
 
 /**************************************
@@ -316,7 +331,7 @@ gltfLoader.load('assets/glTF/baseBuilding.glb', baseBuilding => {
       })
     )
 
-  // entireScene.add(baseBuilding.scene)
+  entireScene.add(baseBuilding.scene)
 })
 
 /**************************************
@@ -341,7 +356,7 @@ gltfLoader.load(
         })
       )
 
-    // entireScene.add(surroundingBuildings.scene)
+    entireScene.add(surroundingBuildings.scene)
   }
 )
 
@@ -365,7 +380,7 @@ gltfLoader.load('assets/glTF/trees.glb', trees => {
       })
     )
 
-  // entireScene.add(trees.scene)
+  entireScene.add(trees.scene)
 })
 
 /**************************************
@@ -388,7 +403,7 @@ gltfLoader.load('assets/glTF/glasses.glb', glasses => {
       })
     )
 
-  // entireScene.add(glasses.scene)
+  entireScene.add(glasses.scene)
 })
 
 /**************************************
@@ -493,7 +508,7 @@ const tick = () => {
  *************************************/
 onMounted(() => {
   document
-    .querySelector('#main')
+    .querySelector('#webgl')
     .appendChild(renderer.domElement)
     .addEventListener('pointermove', ({ offsetX, offsetY }) => {
       cursor.x = (offsetX / viewportSize.x) * 2 - 1
@@ -507,12 +522,56 @@ onMounted(() => {
 <template>
   <h1>3D Viewer</h1>
 
-  <main id="main"></main>
+  <main id="webgl">
+    <div id="loading-container">
+      <b id="loading-text">Leaftech</b>
+      <div id="loading-bar"></div>
+    </div>
+  </main>
 </template>
 
 <style>
 h1 {
   color: black;
   font-weight: bold;
+}
+
+#webgl {
+  position: relative;
+}
+
+#loading-container {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  position: absolute;
+  top: 35%;
+  width: 100%;
+  z-index: 1;
+}
+
+#loading-bar {
+  width: 100%;
+  height: 5px;
+  background-color: #3087df;
+  transform: scaleX(0);
+  transform-origin: top left;
+  transition: transform 0.5s;
+}
+
+#loading-bar.ended {
+  transform: scaleX(0);
+  transform-origin: top right;
+  transition: transform 1.75s ease-in-out;
+}
+
+#loading-text {
+  color: #3087df;
+  font-weight: bold;
+  font-size: 5em;
+  font-family: 'Exo', sans-serif;
+  margin-bottom: 0.5em;
+  transition: opacity 1.75s;
 }
 </style>
