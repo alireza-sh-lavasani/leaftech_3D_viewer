@@ -16,6 +16,16 @@ import {
   Points,
   BufferAttribute,
   Group,
+  Raycaster,
+  Mesh,
+  SphereGeometry,
+  MeshStandardMaterial,
+  InstancedBufferGeometry,
+  InstancedBufferAttribute,
+  MeshBasicMaterial,
+  PlaneBufferGeometry,
+  ShaderMaterial,
+  LoadingManager,
 } from 'three'
 import { onMounted, ref, render, watchEffect } from 'vue'
 // import gsap from 'gsap'
@@ -26,9 +36,18 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader'
 import sensorsData from '../assets/sensorsData'
 
 /**************************************
- ******** Model Loaders
+ ******** Loaders
  *************************************/
-const gltfLoader = new GLTFLoader()
+const onLoad = () => {}
+
+const onProgress = () => {}
+
+const onError = () => {}
+
+const loadingManager = new LoadingManager(onLoad, onProgress, onError)
+
+const gltfLoader = new GLTFLoader(loadingManager)
+const cubeTexureLoader = new CubeTextureLoader(loadingManager)
 
 /**************************************
  ******** GUI
@@ -58,7 +77,6 @@ const scene = new Scene()
 /**************************************
  ******** Environment
  *************************************/
-const cubeTexureLoader = new CubeTextureLoader()
 const environment = cubeTexureLoader.load([
   'assets/HDRI/_1/px.png',
   'assets/HDRI/_1/nx.png',
@@ -79,7 +97,6 @@ scene.background = backgroundParams.visible_env
 scene.environment = environment
 
 // GUI
-
 sceneSetup
   .add(backgroundParams, 'visible_env')
   .name('Visible ENV')
@@ -153,6 +170,32 @@ orbitControls.enableDamping = true
 orbitControls.dampingFactor = 0.1
 
 /**************************************
+ ******** Overlay
+ *************************************/
+
+const overlayGeo = new PlaneBufferGeometry(2, 2, 1, 1)
+const overlayMat = new ShaderMaterial({
+  transparent: true,
+  uniforms: {
+    uAlpha: { value: 0 },
+  },
+  vertexShader: ` 
+  void main() {
+    gl_Position = vec4( position, 1.0);
+  }
+  `,
+  fragmentShader: `
+    uniform float uAlpha;
+
+    void main() {
+    gl_FragColor = vec4( 0.0, 0.0, 0.0, uAlpha );
+  }
+  `,
+})
+const overlay = new Mesh(overlayGeo, overlayMat)
+scene.add(overlay)
+
+/**************************************
  ******** Color Ramp
  *************************************/
 //Color Ramp Class
@@ -205,6 +248,13 @@ const rangeConverter = (
 }
 
 /**************************************
+ ******** Cursor
+ *************************************/
+let cursor = new Vector2(0, 0)
+
+// cursor.x = (clientX / viewportSize.x) * 2 - 1
+
+/**************************************
  ******** Entire Scene Group
  *************************************/
 const entireScene = new Group()
@@ -236,7 +286,7 @@ gltfLoader.load('assets/glTF/terrain.glb', terrain => {
       })
     )
 
-  entireScene.add(terrain.scene)
+  // entireScene.add(terrain.scene)
 })
 
 /**************************************
@@ -266,7 +316,7 @@ gltfLoader.load('assets/glTF/baseBuilding.glb', baseBuilding => {
       })
     )
 
-  entireScene.add(baseBuilding.scene)
+  // entireScene.add(baseBuilding.scene)
 })
 
 /**************************************
@@ -291,7 +341,7 @@ gltfLoader.load(
         })
       )
 
-    entireScene.add(surroundingBuildings.scene)
+    // entireScene.add(surroundingBuildings.scene)
   }
 )
 
@@ -315,7 +365,7 @@ gltfLoader.load('assets/glTF/trees.glb', trees => {
       })
     )
 
-  entireScene.add(trees.scene)
+  // entireScene.add(trees.scene)
 })
 
 /**************************************
@@ -338,17 +388,18 @@ gltfLoader.load('assets/glTF/glasses.glb', glasses => {
       })
     )
 
-  entireScene.add(glasses.scene)
+  // entireScene.add(glasses.scene)
 })
 
 /**************************************
  ******** Particles
  *************************************/
 const sensorsGroup = new Group()
-
 // Placement
 const sensorsGeo = new BufferGeometry()
+// const sensorsGeo = new InstancedBufferGeometry()
 const count = sensorsData.length
+sensorsGeo.instanceCount = sensorsData.length
 
 const sensorPositions = new Float32Array(count * 3)
 const sensorColors = new Float32Array(count * 3)
@@ -374,6 +425,12 @@ for (let i = 0; i < count * 3; i++) {
 sensorsGeo.setAttribute('position', new BufferAttribute(sensorPositions, 3))
 sensorsGeo.setAttribute('color', new BufferAttribute(sensorColors, 3))
 
+// sensorsGeo.setAttribute(
+//   'position',
+//   new InstancedBufferAttribute(sensorPositions, 3)
+// )
+// sensorsGeo.setAttribute('color', new InstancedBufferAttribute(sensorColors, 3))
+
 // Material
 const sensorsMat = new PointsMaterial({
   size: 0.5,
@@ -381,6 +438,7 @@ const sensorsMat = new PointsMaterial({
   vertexColors: true,
 })
 
+// const sensors = new Mesh(sensorsGeo, new MeshBasicMaterial())
 const sensors = new Points(sensorsGeo, sensorsMat)
 
 sensorsGroup.add(sensors)
@@ -413,6 +471,16 @@ const tick = () => {
 
   // sunHelper.update()
 
+  // Ray Caster
+  const raycaster = new Raycaster()
+  raycaster.params.Points.threshold = 0.1
+  raycaster.setFromCamera(cursor, camera)
+
+  const intersects = raycaster.intersectObject(sensors, false)
+  intersects.forEach(intersect => {
+    console.log(intersect.index)
+  })
+
   /**************************************
    ******** Render
    *************************************/
@@ -424,7 +492,14 @@ const tick = () => {
  ******** On Mount
  *************************************/
 onMounted(() => {
-  document.querySelector('#main').appendChild(renderer.domElement)
+  document
+    .querySelector('#main')
+    .appendChild(renderer.domElement)
+    .addEventListener('pointermove', ({ offsetX, offsetY }) => {
+      cursor.x = (offsetX / viewportSize.x) * 2 - 1
+      cursor.y = -((offsetY / viewportSize.y) * 2 - 1)
+    })
+
   tick()
 })
 </script>
