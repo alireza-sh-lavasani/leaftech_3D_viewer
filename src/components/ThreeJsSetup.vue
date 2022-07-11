@@ -513,8 +513,15 @@ const POIsPlacement = () => {
     const cameraNormalPosition = new Vector3(x, y, z).clone()
     cameraNormalPosition.project(camera)
 
-    const translateX = cameraNormalPosition.x * viewportSize.x * 0.5
-    const translateY = -cameraNormalPosition.y * viewportSize.y * 0.5
+    let translateX = cameraNormalPosition.x * viewportSize.x * 0.5
+    let translateY = -cameraNormalPosition.y * viewportSize.y * 0.5
+
+    // keeping the POI in the 3D viewer boundary
+    if (translateX > viewportSize.x / 2) translateX = viewportSize.x / 2
+    else if (translateX < -viewportSize.x / 2) translateX = -viewportSize.x / 2
+
+    if (translateY > viewportSize.y / 2) translateY = viewportSize.y / 2
+    else if (translateY < -viewportSize.y / 2) translateY = -viewportSize.y / 2
 
     document.querySelector(
       `#${id}`
