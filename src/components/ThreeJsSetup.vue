@@ -542,6 +542,8 @@ const showSensorInfo = ({
   // const translateX = cameraNormalPosition.x * viewportSize.x * 0.5
   // const translateY = -cameraNormalPosition.y * viewportSize.y * 0.5
 
+  document.body.style.cursor = 'help'
+
   const element = document.querySelector('#sensor-info')
   element.innerHTML = `
     <b style="font-size: larger; font-weight: bold">Sensor Info</b>
@@ -581,11 +583,11 @@ const tick = () => {
   raycaster.setFromCamera(cursor, camera)
 
   document.querySelector('#sensor-info').style.opacity = 0
+  document.body.style.cursor = 'auto'
 
   const intersects = raycaster.intersectObject(sensors, false)
   intersects.forEach(intersect => {
     showSensorInfo(sensorsData[intersect.index])
-    console.log(intersect.index)
   })
 
   POIsPlacement()
@@ -718,6 +720,7 @@ h1 {
   align-items: center;
   min-width: 2em;
   pointer-events: auto;
+  cursor: help;
 }
 
 .label:hover ~ .info {
