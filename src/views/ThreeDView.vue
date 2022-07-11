@@ -1,9 +1,7 @@
 <script setup>
-import ThreeJsSetup from '@/components/ThreeJsSetup.vue'
+import ThreeJsSetup from '../components/ThreeJsSetup.vue'
 </script>
 
 <template>
-  <main>
-    <ThreeJsSetup />
-  </main>
+  <ThreeJsSetup />
 </template>

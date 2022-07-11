@@ -26,6 +26,7 @@ import {
   PlaneBufferGeometry,
   ShaderMaterial,
   LoadingManager,
+  Vector3,
 } from 'three'
 import { onMounted, ref, render, watchEffect } from 'vue'
 import gsap from 'gsap'
@@ -197,7 +198,7 @@ const overlayMat = new ShaderMaterial({
   uniforms: {
     uAlpha: { value: 1 },
   },
-  vertexShader: ` 
+  vertexShader: `
   void main() {
     gl_Position = vec4( position, 1.0);
   }
@@ -478,8 +479,51 @@ entireScene.rotateY(Math.PI * -0.36)
 const axes = new AxesHelper(50)
 scene.add(axes)
 
+console.log(sensorsData[1107])
+
+/**************************************
+ ******** Points of interest
+ *************************************/
+const pointsOfInterest = [
+  {
+    id: 'pointID000',
+    position: { x: 0, y: 0, z: 0 },
+    info: 'Information for point 000',
+  },
+  // {
+  //   id: '111',
+  //   position: { x: 32, y: 20, z: 10 },
+  //   info: 'Information for point 111',
+  // },
+  // {
+  //   id: '222',
+  //   position: { x: 50, y: 12, z: 5 },
+  //   info: 'Information for point 222',
+  // },
+]
+
+/**************************************
+ ******** POIs placement
+ *************************************/
+const POIsPlacement = () => {
+  pointsOfInterest.forEach(({ id, position: { x, y, z }, info }) => {
+    const cameraNormalPosition = new Vector3(x, y, z).clone()
+    cameraNormalPosition.project(camera)
+
+    const translateX = cameraNormalPosition.x * viewportSize.x * 0.5
+    const translateY = -cameraNormalPosition.y * viewportSize.y * 0.5
+
+    document.querySelector(
+      `#${id}`
+    ).style.transform = `translateX(${translateX}px) translateY(${translateY}px)`
+  })
+}
+
 const clock = new Clock()
 
+/**************************************
+ ******** Tick
+ *************************************/
 const tick = () => {
   // Time
   const elapsedTime = clock.getElapsedTime()
@@ -498,6 +542,8 @@ const tick = () => {
   intersects.forEach(intersect => {
     console.log(intersect.index)
   })
+
+  POIsPlacement()
 
   /**************************************
    ******** Render
@@ -523,17 +569,34 @@ onMounted(() => {
 </script>
 
 <template>
-  <h1>3D Viewer</h1>
+  <div class="container">
+    <h1>3D Viewer</h1>
 
-  <main id="webgl">
-    <div id="loading-container">
-      <b id="loading-text">Leaftech</b>
-      <div id="loading-bar"></div>
-    </div>
-  </main>
+    <main id="webgl">
+      <div id="loading-container">
+        <b id="loading-text">Leaftech</b>
+        <div id="loading-bar"></div>
+      </div>
+
+      <div id="points-of-interest-container">
+        <div class="point" id="pointID000">
+          <span class="label">1</span>
+          <div class="info">
+            At vero est diam sadipscing elitr et sit, lorem dolores et lorem
+            kasd eos, ut ut et duo sed magna.
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
 </template>
 
 <style>
+.container {
+  display: flex;
+  flex-direction: column;
+}
+
 h1 {
   color: black;
   font-weight: bold;
@@ -576,5 +639,55 @@ h1 {
   font-family: 'Exo', sans-serif;
   margin-bottom: 0.5em;
   transition: opacity 0.5s;
+}
+
+#points-of-interest-container {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+  top: 0;
+  left: 0;
+  pointer-events: none;
+}
+
+.point {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 1;
+  color: #e9e9e9;
+  font-size: 0.85em;
+  pointer-events: none;
+}
+
+.label {
+  border-radius: 5px;
+  background-color: #00000080;
+  padding: 0.35em;
+  width: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-width: 2em;
+  pointer-events: auto;
+}
+
+.label:hover ~ .info {
+  opacity: 1;
+}
+
+.info {
+  opacity: 0;
+  border-radius: 5px;
+  background-color: #00000080;
+  padding: 0.5em;
+  width: fit-content;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  max-width: 20em;
+  margin-top: 0.75em;
+  pointer-events: none;
+  transition: opacity ease-in 0.1s;
 }
 </style>
