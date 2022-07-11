@@ -46,8 +46,11 @@ const onLoad = () => {
     document.querySelector('#loading-bar').classList.add('ended')
 
     setTimeout(
-      () =>
-        (document.querySelector('#loading-container').style.display = 'none'),
+      () => {
+        document.querySelector('#loading-container').style.display = 'none'
+        document.querySelector('#overlay-absolute').style.display = 'initial'
+      },
+
       2000
     )
 
@@ -519,6 +522,45 @@ const POIsPlacement = () => {
   })
 }
 
+/**************************************
+ ******** Show Sensor Info
+ *************************************/
+const showSensorInfo = ({
+  ID,
+  cDif,
+  sun_hours,
+  direct_energy_intake,
+  diffuse_energy_intake,
+  global_energy_intake,
+  utmX,
+  utmY,
+  utmZ,
+}) => {
+  // const cameraNormalPosition = new Vector3(utmX, utmY, utmZ).clone()
+  // cameraNormalPosition.project(camera)
+
+  // const translateX = cameraNormalPosition.x * viewportSize.x * 0.5
+  // const translateY = -cameraNormalPosition.y * viewportSize.y * 0.5
+
+  const element = document.querySelector('#sensor-info')
+  element.innerHTML = `
+    <b style="font-size: larger; font-weight: bold">Sensor Info</b>
+    <p>
+      ID: <span class="sensor-value">${ID}</span>
+    </p>
+    <p>cDif: <span class="sensor-value">${cDif}</span></p>
+    <p>Sun Hours: <span class="sensor-value">${sun_hours}</span></p>
+    <p>Direct Energy Intake: <span class="sensor-value">${direct_energy_intake}</span></p>
+    <p>Diffuse Energy Intake: <span class="sensor-value">${diffuse_energy_intake}</span></p>
+    <p>Global Energy Intake: <span class="sensor-value">${global_energy_intake}</span></p>
+    <p>UTM X: <span class="sensor-value">${utmX}</span></p>
+    <p>UTM Y: <span class="sensor-value">${utmY}</span></p>
+    <p>UTM Z: <span class="sensor-value">${utmZ}</span></p>
+  `
+  element.style.opacity = 1
+  // element.style.transform = `translateX(${translateX}px) translateY(${translateY}px)`
+}
+
 const clock = new Clock()
 
 /**************************************
@@ -538,8 +580,11 @@ const tick = () => {
   raycaster.params.Points.threshold = 0.1
   raycaster.setFromCamera(cursor, camera)
 
+  document.querySelector('#sensor-info').style.opacity = 0
+
   const intersects = raycaster.intersectObject(sensors, false)
   intersects.forEach(intersect => {
+    showSensorInfo(sensorsData[intersect.index])
     console.log(intersect.index)
   })
 
@@ -578,14 +623,16 @@ onMounted(() => {
         <div id="loading-bar"></div>
       </div>
 
-      <div id="points-of-interest-container">
+      <div id="overlay-absolute">
         <div class="point" id="pointID000">
-          <span class="label">1</span>
+          <span class="label">Point Of Interest 01</span>
           <div class="info">
             At vero est diam sadipscing elitr et sit, lorem dolores et lorem
             kasd eos, ut ut et duo sed magna.
           </div>
         </div>
+
+        <div id="sensor-info"></div>
       </div>
     </main>
   </div>
@@ -641,7 +688,8 @@ h1 {
   transition: opacity 0.5s;
 }
 
-#points-of-interest-container {
+#overlay-absolute {
+  display: none;
   width: 100%;
   height: 100%;
   position: absolute;
@@ -689,5 +737,29 @@ h1 {
   margin-top: 0.75em;
   pointer-events: none;
   transition: opacity ease-in 0.1s;
+}
+
+#sensor-info {
+  position: absolute;
+  top: 0.5em;
+  left: 0.5em;
+  opacity: 0;
+  border-radius: 5px;
+  background-color: #ffffffcc;
+  padding: 0.5em;
+  width: fit-content;
+  display: flex;
+  flex-direction: column;
+  pointer-events: none;
+  transition: opacity ease-in 0.1s;
+  color: black;
+  font-size: 0.7em;
+  z-index: 1;
+  font-weight: normal;
+}
+
+.sensor-value {
+  color: #3087df;
+  font-size: 0.75rem;
 }
 </style>
