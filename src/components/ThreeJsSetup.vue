@@ -27,6 +27,7 @@ import {
   ShaderMaterial,
   LoadingManager,
   Vector3,
+  Object3D,
 } from 'three'
 import { onMounted, ref, render, watchEffect } from 'vue'
 import gsap from 'gsap'
@@ -142,6 +143,12 @@ const camera = new PerspectiveCamera(
   1000
 )
 camera.position.set(30, 20, 70)
+
+/**************************************
+ ******** Z Up
+ *************************************/
+Object3D.DefaultUp = new Vector3(0, 0, 1)
+camera.up.set(0, 0, 1)
 
 const sun = new DirectionalLight(params.sunColor, 3)
 sun.position.set(-50, 30, 50)
@@ -589,7 +596,7 @@ const tick = () => {
   raycaster.params.Points.threshold = 0.1
   raycaster.setFromCamera(cursor, camera)
 
-  document.querySelector('#sensor-info').style.opacity = 0
+  // document.querySelector('#sensor-info').style.opacity = 0
   document.body.style.cursor = 'auto'
 
   const intersects = raycaster.intersectObject(sensors, false)
@@ -623,9 +630,9 @@ onMounted(() => {
 </script>
 
 <template>
-  <div class="container">
-    <h1>3D Viewer</h1>
+  <!-- <h1>3D Viewer</h1> -->
 
+  <div class="container">
     <main id="webgl">
       <div id="loading-container">
         <b id="loading-text">Leaftech</b>
@@ -640,17 +647,42 @@ onMounted(() => {
             kasd eos, ut ut et duo sed magna.
           </div>
         </div>
-
-        <div id="sensor-info"></div>
       </div>
     </main>
+
+    <div id="sensor-info">
+      <b style="font-size: larger; font-weight: bold">Sensor Info</b>
+      <p>ID: <span class="sensor-value">${ID}</span></p>
+      <p>cDif: <span class="sensor-value">${cDif}</span></p>
+      <p>Sun Hours: <span class="sensor-value">${sun_hours}</span></p>
+      <p>
+        Direct Energy Intake:
+        <span class="sensor-value">${direct_energy_intake}</span>
+      </p>
+      <p>
+        Diffuse Energy Intake:
+        <span class="sensor-value">${diffuse_energy_intake}</span>
+      </p>
+      <p>
+        Global Energy Intake:
+        <span class="sensor-value">${global_energy_intake}</span>
+      </p>
+      <p>UTM X: <span class="sensor-value">${utmX}</span></p>
+      <p>UTM Y: <span class="sensor-value">${utmY}</span></p>
+      <p>UTM Z: <span class="sensor-value">${utmZ}</span></p>
+    </div>
   </div>
 </template>
 
 <style>
 .container {
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: 1fr;
+  grid-template-columns: auto 1fr;
+  grid-gap: 2em;
+  max-width: 83vw;
+  margin-left: 2em;
+  margin-top: 15vh;
 }
 
 h1 {
@@ -750,14 +782,14 @@ h1 {
 }
 
 #sensor-info {
-  position: absolute;
-  top: 0.5em;
-  left: 0.5em;
-  opacity: 0;
+  /* position: absolute; */
+  /* top: 0.5em; */
+  /* left: 0.5em; */
+  /* opacity: 0; */
+  width: 100%;
   border-radius: 5px;
   background-color: #ffffffcc;
   padding: 0.5em;
-  width: fit-content;
   display: flex;
   flex-direction: column;
   pointer-events: none;
